@@ -26,9 +26,6 @@ defmodule GlificWeb.Schema.ConversationTypes do
 
     @desc "Exclude conversations with these tags"
     field :exclude_tags, list_of(:gid)
-
-    @desc "Exclude conversations with these tags"
-    field :exclude_tags, list_of(:gid)
   end
 
   @desc "Filtering options for conversations"

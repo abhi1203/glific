@@ -24,14 +24,17 @@ defmodule Glific.Conversations do
   Returns the last M conversations, each conversation not more than N messages
   """
   @spec list_conversations(map()) :: list()
-  def list_conversations(%{number_of_conversations: nc, size_of_conversations: sc} = args),
-    do: Messages.list_conversations(Map.put(args, :ids, get_message_ids(nc, sc, args)))
+  def list_conversations(%{number_of_conversations: nc, size_of_conversations: sc} = args) do
+    Messages.list_conversations(Map.put(args, :ids, get_message_ids(nc, sc, args)))
+  end
+
 
   @doc """
   Returns the filtered conversation by contact id
   """
   @spec conversation_by_id(map()) :: Conversation.t()
   def conversation_by_id(%{contact_id: contact_id, size_of_conversations: sc} = args) do
+
     args = put_in(args, [Access.key(:filter, %{}), :id], contact_id)
 
     case args
@@ -43,20 +46,30 @@ defmodule Glific.Conversations do
   end
 
   @spec get_message_ids(integer(), integer(), map() | nil) :: list()
-  defp get_message_ids(nc, sc, %{filter: %{id: id}}),
-    do: process_results(Repo.query(@sql_ids, [nc, [id]]), sc)
+  defp get_message_ids(nc, sc, %{filter: %{id: id}} = args) do
+    process_results(Repo.query(@sql_ids, [nc, [id]]), sc, args)
+  end
 
-  defp get_message_ids(nc, sc, %{filter: %{ids: ids}}),
-    do: process_results(Repo.query(@sql_ids, [nc, ids]), sc)
+  defp get_message_ids(nc, sc, %{filter: %{ids: ids}} = args) do
+    process_results(Repo.query(@sql_ids, [nc, ids]), sc, args)
+  end
 
-  defp get_message_ids(nc, sc, _),
-    do: process_results(Repo.query(@sql_all, [nc]), sc)
+  defp get_message_ids(nc, sc, _) do
+    process_results(Repo.query(@sql_all, [nc, 0]), sc, %{})
+  end
 
-  @spec process_results({:ok, map()}, integer()) :: list()
-  defp process_results({:ok, results}, sc) do
+  @spec process_results({:ok, map()}, integer(), integer()) :: list()
+  defp process_results({:ok, results}, sc, args) do
+    offset = Map.get(Map.get(args, :opts, %{}), :offset, 0)
+
     results.rows
     |> Enum.reduce([], fn [last_message_id | [ancestors]], acc ->
-      acc ++ [last_message_id | Enum.take(ancestors, sc)]
+      list =
+        Enum.drop([last_message_id | ancestors ], offset)
+        |> Enum.take(sc)
+
+      acc ++ list
+
     end)
   end
 end

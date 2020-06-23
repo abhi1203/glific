@@ -55,7 +55,7 @@ defmodule Glific.Conversations do
   end
 
   defp get_message_ids(nc, sc, _) do
-    process_results(Repo.query(@sql_all, [nc, 0]), sc, %{})
+    process_results(Repo.query(@sql_all, [nc]), sc, %{})
   end
 
   @spec process_results({:ok, map()}, integer(), integer()) :: list()

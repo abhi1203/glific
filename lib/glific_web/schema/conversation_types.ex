@@ -26,6 +26,9 @@ defmodule GlificWeb.Schema.ConversationTypes do
 
     @desc "Exclude conversations with these tags"
     field :exclude_tags, list_of(:gid)
+
+    @desc "Exclude conversations with these tags"
+    field :exclude_tags, list_of(:gid)
   end
 
   @desc "Filtering options for conversations"
@@ -43,6 +46,7 @@ defmodule GlificWeb.Schema.ConversationTypes do
       arg(:number_of_conversations, non_null(:integer))
       arg(:size_of_conversations, non_null(:integer))
       arg(:filter, :conversations_filter)
+      arg(:opts, :opts)
       resolve(&Resolvers.Conversations.conversations/3)
     end
 
@@ -51,6 +55,7 @@ defmodule GlificWeb.Schema.ConversationTypes do
       arg(:contact_id, non_null(:gid))
       arg(:size_of_conversations, non_null(:integer))
       arg(:filter, :conversation_filter)
+      arg(:opts, :opts)
       resolve(&Resolvers.Conversations.conversation/3)
     end
   end
